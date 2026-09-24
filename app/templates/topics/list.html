@@ -1,0 +1,38 @@
+{% extends "layouts/app.html" %}
+
+{% block title %}Temas · {{ app_name }}{% endblock %}
+
+{% block content %}
+{{ ui.page_header("Temas", "Los clientes eligen un tema al crear un ticket.") }}
+
+<form class="card mb-6 grid gap-3 sm:grid-cols-[1fr_auto] sm:items-end" hx-post="/admin/topics"
+      hx-target="#form-alert" hx-disabled-elt="find button">
+  <div class="sm:col-span-2">{{ ui.form_alert() }}</div>
+  {{ ui.field("name", "Nuevo tema", placeholder="Ej.: Facturación") }}
+  <button class="btn-primary">{{ icons.icon("plus", "size-4") }}Agregar</button>
+</form>
+
+{% if topics %}
+<ul class="card divide-y divide-slate-100 p-0! overflow-hidden">
+  {% for topic in topics %}
+  <li class="flex items-center justify-between gap-3 px-4 py-3 sm:px-6">
+    <span class="flex flex-wrap items-center gap-2 font-medium text-slate-900">
+      {{ topic.name }} {{ ui.active_badge(topic.is_active) }}
+    </span>
+    <div class="flex shrink-0 gap-2">
+      <a href="/admin/topics/{{ topic.id }}" class="btn-secondary">Editar</a>
+      <form hx-post="/admin/topics/{{ topic.id }}/active">
+        <input type="hidden" name="is_active" value="{{ 'false' if topic.is_active else 'true' }}">
+        <button class="{{ 'btn-danger' if topic.is_active else 'btn-secondary' }}">
+          {{ "Desactivar" if topic.is_active else "Activar" }}
+        </button>
+      </form>
+    </div>
+  </li>
+  {% endfor %}
+</ul>
+<p class="mt-3 text-xs text-slate-500">Los temas desactivados no se ofrecen en tickets nuevos, pero se conservan en los existentes.</p>
+{% else %}
+{{ ui.empty_state("Todavía no hay temas. Crea al menos uno para que los clientes puedan abrir tickets.") }}
+{% endif %}
+{% endblock %}

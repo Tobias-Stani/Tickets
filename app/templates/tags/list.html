@@ -1,0 +1,28 @@
+{% extends "layouts/app.html" %}
+
+{% block title %}Etiquetas · {{ app_name }}{% endblock %}
+
+{% block content %}
+{{ ui.page_header("Etiquetas", "Identifican a tus clientes, por ejemplo por plan.") }}
+
+<form class="card mb-6 grid gap-3 sm:grid-cols-[1fr_auto_auto] sm:items-end" hx-post="/admin/tags"
+      hx-target="#form-alert" hx-disabled-elt="find button">
+  <div class="sm:col-span-3">{{ ui.form_alert() }}</div>
+  {{ ui.field("name", "Nueva etiqueta", placeholder="Ej.: Plan Pro") }}
+  {% include "tags/_color_input.html" %}
+  <button class="btn-primary">{{ icons.icon("plus", "size-4") }}Agregar</button>
+</form>
+
+{% if tags %}
+<ul class="card divide-y divide-slate-100 p-0! overflow-hidden">
+  {% for tag in tags %}
+  <li class="flex items-center justify-between gap-3 px-4 py-3 sm:px-6">
+    {{ ui.tag_badge(tag) }}
+    <a href="/admin/tags/{{ tag.id }}" class="btn-secondary">Editar</a>
+  </li>
+  {% endfor %}
+</ul>
+{% else %}
+{{ ui.empty_state("Todavía no hay etiquetas.") }}
+{% endif %}
+{% endblock %}

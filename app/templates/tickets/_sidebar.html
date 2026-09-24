@@ -1,0 +1,32 @@
+{# Ticket metadata; admins also get the status control. #}
+<aside class="space-y-6">
+  <dl class="card space-y-4 text-sm">
+    {% set rows = [
+      ("Cliente", ticket.client.full_name),
+      ("Tema", ticket.topic.name),
+      ("Creado", ticket.created_at | datetime),
+      ("Última actividad", ticket.updated_at | datetime),
+    ] %}
+    {% for label, value in rows %}
+    <div>
+      <dt class="text-slate-500">{{ label }}</dt>
+      <dd class="mt-0.5 font-medium text-slate-900">{{ value }}</dd>
+    </div>
+    {% endfor %}
+    {% if user.is_admin and ticket.client.tags %}
+    <div>
+      <dt class="text-slate-500">Etiquetas</dt>
+      <dd class="mt-1 flex flex-wrap gap-1">{% for tag in ticket.client.tags %}{{ ui.tag_badge(tag) }}{% endfor %}</dd>
+    </div>
+    {% endif %}
+  </dl>
+
+  {% if user.is_admin and ticket.status.value != "CLOSED" %}
+  <form class="card space-y-4" hx-post="/admin/tickets/{{ ticket.id }}/status" hx-target="#status-alert">
+    <div id="status-alert" class="empty:hidden"></div>
+    {{ ui.select("status", "Cambiar estado", status_options(), ticket.status.value) }}
+    <button class="btn-primary w-full">Guardar estado</button>
+    <p class="text-xs text-slate-500">Al cerrar el ticket ya no se podrá responder ni reabrir.</p>
+  </form>
+  {% endif %}
+</aside>

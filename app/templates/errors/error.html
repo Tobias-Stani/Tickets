@@ -1,0 +1,13 @@
+{% extends "layouts/base.html" %}
+
+{% block title %}Algo salió mal · {{ app_name }}{% endblock %}
+
+{% block body %}
+<main class="flex min-h-full items-center justify-center px-4">
+  <div class="card max-w-md text-center">
+    <h1 class="text-lg font-semibold text-slate-900">Algo salió mal</h1>
+    <p class="mt-2 text-sm text-slate-600">{{ message }}</p>
+    <a href="/" class="btn-primary mt-6 inline-flex">Ir al inicio</a>
+  </div>
+</main>
+{% endblock %}

@@ -1,0 +1,60 @@
+{% extends "layouts/app.html" %}
+{% set editing = user_obj is not none %}
+
+{% block title %}{{ "Editar usuario" if editing else "Nuevo usuario" }} · {{ app_name }}{% endblock %}
+
+{% block content %}
+<div class="mx-auto max-w-2xl space-y-6">
+  <a href="/admin/users" class="inline-flex items-center gap-1.5 text-sm text-slate-500 hover:text-slate-900">
+    {{ icons.icon("arrow-left", "size-4") }}Volver a usuarios
+  </a>
+  {{ ui.page_header(user_obj.full_name if editing else "Nuevo usuario",
+                    "Datos, rol y etiquetas del usuario." if editing else "El usuario podrá ingresar con este email y contraseña.") }}
+
+  <form class="card space-y-5" hx-post="{{ '/admin/users/' ~ user_obj.id if editing else '/admin/users' }}"
+        hx-target="#form-alert" hx-disabled-elt="find button">
+    {{ ui.form_alert() }}
+    {{ ui.field("full_name", "Nombre completo", value=user_obj.full_name if editing else "") }}
+    {{ ui.field("email", "Email", type="email", value=user_obj.email if editing else "", autocomplete="off") }}
+    {% if not editing %}
+      {{ ui.field("password", "Contraseña", type="password", autocomplete="new-password", placeholder="Mínimo 8 caracteres") }}
+    {% endif %}
+    {{ ui.select("role", "Rol", role_options(), user_obj.role.value if editing else "CLIENT") }}
+
+    <fieldset class="space-y-2">
+      <legend class="label">Etiquetas</legend>
+      {% if tags %}
+      {% set selected = user_obj.tags | map(attribute="id") | list if editing else [] %}
+      <div class="flex flex-wrap gap-2">
+        {% for tag in tags %}
+        <label class="flex cursor-pointer items-center gap-2 rounded-lg border border-slate-200 px-3 py-2 text-sm has-checked:border-indigo-400 has-checked:bg-indigo-50">
+          <input type="checkbox" name="tag_ids" value="{{ tag.id }}" class="accent-indigo-600" {{ "checked" if tag.id in selected }}>
+          {{ ui.tag_badge(tag) }}
+        </label>
+        {% endfor %}
+      </div>
+      {% else %}
+      <p class="text-sm text-slate-500">No hay etiquetas. <a href="/admin/tags" class="text-indigo-600 hover:underline">Crear etiquetas</a></p>
+      {% endif %}
+    </fieldset>
+
+    <div class="flex flex-col-reverse gap-3 sm:flex-row sm:justify-end">
+      <a href="/admin/users" class="btn-secondary">Cancelar</a>
+      <button class="btn-primary">{{ "Guardar cambios" if editing else "Crear usuario" }}</button>
+    </div>
+  </form>
+
+  {% if editing %}
+  <form class="card space-y-4" hx-post="/admin/users/{{ user_obj.id }}/password" hx-target="#password-alert"
+        hx-disabled-elt="find button">
+    <div>
+      <h2 class="font-semibold text-slate-900">Restablecer contraseña</h2>
+      <p class="text-sm text-slate-500">Úsalo cuando el usuario olvide su contraseña.</p>
+    </div>
+    <div id="password-alert" class="empty:hidden"></div>
+    {{ ui.field("password", "Nueva contraseña", type="password", autocomplete="new-password", placeholder="Mínimo 8 caracteres") }}
+    <div class="flex justify-end"><button class="btn-secondary">Actualizar contraseña</button></div>
+  </form>
+  {% endif %}
+</div>
+{% endblock %}

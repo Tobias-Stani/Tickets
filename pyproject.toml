@@ -1,0 +1,48 @@
+[project]
+name = "tickets"
+version = "0.1.0"
+description = "Support ticket system"
+requires-python = ">=3.14"
+dependencies = [
+    "fastapi>=0.115",
+    "uvicorn[standard]>=0.30",
+    "sqlalchemy>=2.0.36",
+    "alembic>=1.14",
+    "psycopg[binary]>=3.2",
+    "pydantic[email]>=2.9",
+    "pydantic-settings>=2.6",
+    "jinja2>=3.1",
+    "python-multipart>=0.0.12",
+    "itsdangerous>=2.2",
+    "argon2-cffi>=23.1",
+    "filetype>=1.2",
+    "tzdata>=2024.1",
+]
+
+[project.optional-dependencies]
+dev = [
+    "pytest>=8.3",
+    "httpx>=0.27",
+    "ruff>=0.7",
+]
+
+[tool.setuptools.packages.find]
+include = ["app*"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+addopts = "-q"
+
+[tool.ruff]
+line-length = 100
+target-version = "py314"
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "B", "UP", "SIM", "C90"]
+
+[tool.ruff.lint.per-file-ignores]
+# SQLAlchemy resolves quoted relationship targets across modules; keep the quotes.
+"**/models.py" = ["UP037"]
+
+[tool.ruff.lint.mccabe]
+max-complexity = 8

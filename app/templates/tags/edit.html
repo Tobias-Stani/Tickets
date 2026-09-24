@@ -1,0 +1,31 @@
+{% extends "layouts/app.html" %}
+
+{% block title %}Editar etiqueta · {{ app_name }}{% endblock %}
+
+{% block content %}
+<div class="mx-auto max-w-xl space-y-6">
+  <a href="/admin/tags" class="inline-flex items-center gap-1.5 text-sm text-slate-500 hover:text-slate-900">
+    {{ icons.icon("arrow-left", "size-4") }}Volver a etiquetas
+  </a>
+  {{ ui.page_header("Editar etiqueta") }}
+
+  <form class="card space-y-5" hx-post="/admin/tags/{{ tag.id }}" hx-target="#form-alert"
+        hx-disabled-elt="find button">
+    {{ ui.form_alert() }}
+    {{ ui.field("name", "Nombre", value=tag.name) }}
+    {% include "tags/_color_input.html" %}
+    <div class="flex justify-end"><button class="btn-primary">Guardar cambios</button></div>
+  </form>
+
+  <form class="card flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between"
+        hx-post="/admin/tags/{{ tag.id }}/delete" hx-target="#delete-alert"
+        hx-confirm="¿Eliminar la etiqueta {{ tag.name }}? Se quitará de todos los usuarios.">
+    <div>
+      <h2 class="font-semibold text-slate-900">Eliminar etiqueta</h2>
+      <p class="text-sm text-slate-500">Se quitará de todos los usuarios que la tengan.</p>
+      <div id="delete-alert" class="mt-2 empty:hidden"></div>
+    </div>
+    <button class="btn-danger">Eliminar</button>
+  </form>
+</div>
+{% endblock %}

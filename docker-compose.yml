@@ -1,0 +1,46 @@
+services:
+  web:
+    build: .
+    command: ["scripts/start.sh", "--reload"]
+    env_file: .env
+    environment:
+      DATABASE_URL: postgresql://tickets:tickets@db:5432/tickets
+      HTTPS_ONLY_COOKIES: "false"
+    ports:
+      - "${WEB_HOST_PORT:-8010}:8000"
+    volumes:
+      - ./app:/srv/app
+      - ./migrations:/srv/migrations
+      - css:/srv/app/static/css
+    depends_on:
+      db:
+        condition: service_healthy
+
+  tailwind:
+    build:
+      context: .
+      target: css
+    command: ["tailwindcss", "-i", "app/styles/input.css", "-o", "app/static/css/app.css", "--watch=always"]
+    volumes:
+      - ./app/styles:/build/app/styles
+      - ./app/templates:/build/app/templates
+      - css:/build/app/static/css
+
+  db:
+    image: postgres:17-alpine
+    environment:
+      POSTGRES_USER: tickets
+      POSTGRES_PASSWORD: tickets
+      POSTGRES_DB: tickets
+    ports:
+      - "${DB_HOST_PORT:-5434}:5432"
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U tickets"]
+      interval: 3s
+      retries: 10
+
+volumes:
+  pgdata:
+  css:

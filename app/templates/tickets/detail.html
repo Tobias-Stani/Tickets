@@ -1,0 +1,49 @@
+{% extends "layouts/app.html" %}
+
+{% block title %}Ticket #{{ ticket.id }} · {{ app_name }}{% endblock %}
+
+{% block content %}
+{% set back_url = "/admin/tickets" if user.is_admin else "/tickets" %}
+{% set is_closed = ticket.status.value == "CLOSED" %}
+
+<a href="{{ back_url }}" class="mb-4 inline-flex items-center gap-1.5 text-sm text-slate-500 hover:text-slate-900">
+  {{ icons.icon("arrow-left", "size-4") }}Volver
+</a>
+
+<div class="grid gap-6 lg:grid-cols-3">
+  <div class="space-y-6 lg:col-span-2">
+    <article class="card">
+      <div class="flex items-start justify-between gap-3">
+        <h1 class="text-xl font-semibold text-slate-900">#{{ ticket.id }} · {{ ticket.subject }}</h1>
+        {{ ui.status_badge(ticket.status) }}
+      </div>
+      <p class="mt-4 whitespace-pre-line text-slate-700">{{ ticket.description }}</p>
+      {% if ticket.images %}
+      <div class="mt-5 grid grid-cols-3 gap-3">
+        {% for image in ticket.images %}
+        {% set url = "/tickets/" ~ ticket.id ~ "/images/" ~ image.id %}
+        <a href="{{ url }}" target="_blank" class="block aspect-square overflow-hidden rounded-xl border border-slate-200">
+          <img src="{{ url }}" alt="Imagen adjunta {{ loop.index }}" loading="lazy" class="size-full object-cover transition hover:scale-105">
+        </a>
+        {% endfor %}
+      </div>
+      {% endif %}
+    </article>
+
+    {% include "tickets/_conversation.html" %}
+
+    {% if is_closed %}
+      {{ ui.alert("Este ticket está cerrado. Para continuar es necesario crear un ticket nuevo.") }}
+    {% else %}
+    <form class="card space-y-4" hx-post="/tickets/{{ ticket.id }}/replies" hx-target="#form-alert"
+          hx-disabled-elt="find button">
+      {{ ui.form_alert() }}
+      {{ ui.textarea("body", "Responder", rows=4, placeholder="Escribe tu respuesta...") }}
+      <div class="flex justify-end"><button class="btn-primary">Enviar respuesta</button></div>
+    </form>
+    {% endif %}
+  </div>
+
+  {% include "tickets/_sidebar.html" %}
+</div>
+{% endblock %}

@@ -1,0 +1,25 @@
+{# Ticket list shared by client and admin views. Set `show_client` to include the client. #}
+{% import "components/macros.html" as ui %}
+{% if page.items %}
+<ul class="card divide-y divide-slate-100 p-0! overflow-hidden">
+  {% for ticket in page.items %}
+  <li>
+    <a href="/tickets/{{ ticket.id }}" class="list-row">
+      <div class="flex items-start justify-between gap-3">
+        <div class="min-w-0">
+          <p class="truncate font-medium text-slate-900">#{{ ticket.id }} · {{ ticket.subject }}</p>
+          <p class="mt-1 text-sm text-slate-500">
+            {% if show_client %}{{ ticket.client.full_name }} · {% endif %}{{ ticket.topic.name }}
+            · {{ ticket.updated_at | datetime }}
+          </p>
+        </div>
+        {{ ui.status_badge(ticket.status) }}
+      </div>
+    </a>
+  </li>
+  {% endfor %}
+</ul>
+{{ ui.pagination(page, request) }}
+{% else %}
+{{ ui.empty_state(empty_message) }}
+{% endif %}

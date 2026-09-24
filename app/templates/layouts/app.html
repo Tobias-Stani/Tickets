@@ -1,0 +1,55 @@
+{% extends "layouts/base.html" %}
+{% import "components/macros.html" as ui %}
+{% import "components/icons.html" as icons %}
+{% set user = current_user(request) %}
+{% set nav = nav_for(user) %}
+
+{% block body %}
+<header class="sticky top-0 z-20 border-b border-slate-200 bg-white/80 backdrop-blur">
+  <nav class="mx-auto flex h-16 max-w-6xl items-center justify-between gap-4 px-4">
+    <a href="/" class="flex items-center gap-2 font-semibold text-slate-900">
+      <span class="grid size-8 place-items-center rounded-lg bg-indigo-600 text-sm text-white">T</span>
+      <span>{{ app_name }}</span>
+    </a>
+    <ul class="hidden items-center gap-1 md:flex">
+      {% for item in nav %}
+      <li>
+        <a href="{{ item.url }}"
+           class="nav-link {{ 'nav-link-active' if item.is_active(request.url.path) }}">
+          {{ icons.icon(item.icon, "size-4") }}{{ item.label }}
+        </a>
+      </li>
+      {% endfor %}
+    </ul>
+    <div class="flex items-center gap-3">
+      <span class="hidden text-sm text-slate-500 lg:inline">{{ user.full_name }}</span>
+      <form method="post" action="/logout">
+        {{ ui.csrf_input(request) }}
+        <button class="btn-secondary">Salir</button>
+      </form>
+    </div>
+  </nav>
+</header>
+
+<main class="mx-auto max-w-6xl px-4 pt-6 pb-28 sm:pt-10 md:pb-10">
+  {% with flash = pop_flash(request) %}
+    {% if flash %}<div class="mb-6">{{ ui.alert(flash.message, flash.kind) }}</div>{% endif %}
+  {% endwith %}
+  {% block content %}{% endblock %}
+</main>
+
+{# Mobile bottom navigation: thumb-friendly, always visible. #}
+<nav class="fixed inset-x-0 bottom-0 z-20 border-t border-slate-200 bg-white/95 backdrop-blur md:hidden">
+  <ul class="mx-auto flex max-w-md justify-around px-2 pb-[env(safe-area-inset-bottom)]">
+    {% for item in nav %}
+    <li class="flex-1">
+      <a href="{{ item.url }}"
+         class="tab-link {{ 'tab-link-active' if item.is_active(request.url.path) }}">
+        {{ icons.icon(item.icon, "size-6") }}
+        <span>{{ item.label }}</span>
+      </a>
+    </li>
+    {% endfor %}
+  </ul>
+</nav>
+{% endblock %}

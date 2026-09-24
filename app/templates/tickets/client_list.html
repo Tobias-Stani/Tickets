@@ -1,0 +1,13 @@
+{% extends "layouts/app.html" %}
+
+{% block title %}Mis tickets · {{ app_name }}{% endblock %}
+
+{% block content %}
+{% call ui.page_header("Mis tickets", "Consulta el estado de tus tickets.") %}
+  <a href="/tickets/new" class="btn-primary">{{ icons.icon("plus", "size-4") }}Nuevo ticket</a>
+{% endcall %}
+
+{% with show_client = false, empty_message = "Todavía no creaste ningún ticket." %}
+  {% include "tickets/_rows.html" %}
+{% endwith %}
+{% endblock %}

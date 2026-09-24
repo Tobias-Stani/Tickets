@@ -1,0 +1,19 @@
+{% extends "layouts/app.html" %}
+
+{% block title %}Editar tema · {{ app_name }}{% endblock %}
+
+{% block content %}
+<div class="mx-auto max-w-xl space-y-6">
+  <a href="/admin/topics" class="inline-flex items-center gap-1.5 text-sm text-slate-500 hover:text-slate-900">
+    {{ icons.icon("arrow-left", "size-4") }}Volver a temas
+  </a>
+  {{ ui.page_header("Editar tema") }}
+
+  <form class="card space-y-5" hx-post="/admin/topics/{{ topic.id }}" hx-target="#form-alert"
+        hx-disabled-elt="find button">
+    {{ ui.form_alert() }}
+    {{ ui.field("name", "Nombre", value=topic.name) }}
+    <div class="flex justify-end"><button class="btn-primary">Guardar cambios</button></div>
+  </form>
+</div>
+{% endblock %}

@@ -1,0 +1,53 @@
+{% extends "layouts/app.html" %}
+
+{% block title %}Usuarios · {{ app_name }}{% endblock %}
+
+{% block content %}
+{% call ui.page_header("Usuarios", "Clientes y administradores del sistema.") %}
+  <a href="/admin/users/new" class="btn-primary">{{ icons.icon("plus", "size-4") }}Nuevo usuario</a>
+{% endcall %}
+
+<form method="get" action="/admin/users" class="card mb-4 grid gap-3 sm:grid-cols-3"
+      hx-get="/admin/users" hx-trigger="change, keyup changed delay:400ms from:#search"
+      hx-target="#results" hx-select="#results" hx-swap="outerHTML" hx-push-url="true">
+  <div class="space-y-1.5 sm:col-span-2">
+    <label for="search" class="label">Buscar</label>
+    <input id="search" name="search" type="search" value="{{ search }}" placeholder="Nombre o email" class="input">
+  </div>
+  {{ ui.select("role", "Rol", role_options(), role, "Todos", required=false) }}
+</form>
+
+<div id="results">
+  {% if page.items %}
+  <ul class="card divide-y divide-slate-100 p-0! overflow-hidden">
+    {% for item in page.items %}
+    <li class="flex flex-col gap-3 px-4 py-4 sm:flex-row sm:items-center sm:justify-between sm:px-6">
+      <a href="/admin/users/{{ item.id }}" class="min-w-0 hover:opacity-80">
+        <p class="flex flex-wrap items-center gap-2 font-medium text-slate-900">
+          {{ item.full_name }} {{ ui.active_badge(item.is_active) }}
+        </p>
+        <p class="mt-0.5 truncate text-sm text-slate-500">{{ item.email }} · {{ role_label(item.role) }}
+          {% if not item.is_admin %} · {{ item.ticket_count }} tickets{% endif %}</p>
+        {% if item.tags %}<div class="mt-2 flex flex-wrap gap-1">{% for tag in item.tags %}{{ ui.tag_badge(tag) }}{% endfor %}</div>{% endif %}
+      </a>
+      <div class="flex shrink-0 gap-2">
+        <a href="/admin/users/{{ item.id }}" class="btn-secondary">Editar</a>
+        {% if item.id != user.id %}
+        <form hx-post="/admin/users/{{ item.id }}/active" hx-target="#list-alert">
+          <input type="hidden" name="is_active" value="{{ 'false' if item.is_active else 'true' }}">
+          <button class="{{ 'btn-danger' if item.is_active else 'btn-secondary' }}">
+            {{ "Desactivar" if item.is_active else "Activar" }}
+          </button>
+        </form>
+        {% endif %}
+      </div>
+    </li>
+    {% endfor %}
+  </ul>
+  <div id="list-alert" class="mt-4 empty:hidden"></div>
+  {{ ui.pagination(page, request) }}
+  {% else %}
+  {{ ui.empty_state("No se encontraron usuarios.") }}
+  {% endif %}
+</div>
+{% endblock %}

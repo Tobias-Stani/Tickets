@@ -1,0 +1,22 @@
+{# Reply history. Messages from the viewer align right, like a chat. #}
+<section>
+  <h2 class="mb-3 text-sm font-semibold tracking-wide text-slate-500 uppercase">Historial de respuestas</h2>
+  {% if ticket.messages %}
+  <ol class="space-y-3">
+    {% for message in ticket.messages %}
+    {% set mine = message.author_id == user.id %}
+    <li class="flex {{ 'justify-end' if mine }}">
+      <div class="max-w-[85%] rounded-2xl px-4 py-3 {{ 'bg-indigo-600 text-white' if mine else 'border border-slate-200 bg-white' }}">
+        <p class="text-xs {{ 'text-indigo-100' if mine else 'text-slate-500' }}">
+          {{ message.author.full_name }}{% if message.author.is_admin %} · Soporte{% endif %}
+          · {{ message.created_at | datetime }}
+        </p>
+        <p class="mt-1 whitespace-pre-line text-sm">{{ message.body }}</p>
+      </div>
+    </li>
+    {% endfor %}
+  </ol>
+  {% else %}
+  <p class="text-sm text-slate-500">Todavía no hay respuestas.</p>
+  {% endif %}
+</section>

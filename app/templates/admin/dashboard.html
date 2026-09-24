@@ -1,0 +1,41 @@
+{% extends "layouts/app.html" %}
+
+{% block title %}Inicio · {{ app_name }}{% endblock %}
+
+{% block content %}
+{{ ui.page_header("Hola, " ~ user.full_name, "Este es el resumen de tus tickets.") }}
+
+<section class="grid grid-cols-2 gap-3 sm:gap-4 lg:grid-cols-4">
+  {% set accents = {
+    "OPEN": "text-sky-600", "IN_PROGRESS": "text-amber-600",
+    "ANSWERED": "text-emerald-600", "CLOSED": "text-slate-500",
+  } %}
+  {% for status, total in counts.items() %}
+  <a href="/admin/tickets?status={{ status.value }}" class="card transition hover:border-indigo-300 hover:shadow-md">
+    <p class="text-sm font-medium text-slate-500">{{ status_label(status) }}</p>
+    <p class="mt-2 text-3xl font-semibold {{ accents[status.value] }}">{{ total }}</p>
+  </a>
+  {% endfor %}
+</section>
+
+<h2 class="mt-10 mb-4 text-sm font-semibold tracking-wide text-slate-500 uppercase">Accesos rápidos</h2>
+<section class="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
+  {% set shortcuts = [
+    ("/admin/tickets", "ticket", "Ver tickets", "Todos los tickets y filtros"),
+    ("/admin/users/new", "users", "Nuevo usuario", "Crear cliente o administrador"),
+    ("/admin/tags", "tag", "Etiquetas", "Planes y categorías de clientes"),
+    ("/admin/topics", "folder", "Temas", "Temas disponibles para tickets"),
+  ] %}
+  {% for url, icon, title, description in shortcuts %}
+  <a href="{{ url }}" class="card flex items-start gap-4 transition hover:border-indigo-300 hover:shadow-md">
+    <span class="grid size-10 place-items-center rounded-xl bg-indigo-50 text-indigo-600">
+      {{ icons.icon(icon) }}
+    </span>
+    <span>
+      <span class="block font-medium text-slate-900">{{ title }}</span>
+      <span class="block text-sm text-slate-500">{{ description }}</span>
+    </span>
+  </a>
+  {% endfor %}
+</section>
+{% endblock %}
