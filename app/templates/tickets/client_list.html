@@ -7,7 +7,11 @@
   <a href="/tickets/new" class="btn-primary">{{ icons.icon("plus", "size-4") }}Nuevo ticket</a>
 {% endcall %}
 
-{% with show_client = false, empty_message = "Todavía no creaste ningún ticket." %}
-  {% include "tickets/_rows.html" %}
-{% endwith %}
+{% include "tickets/_filters.html" %}
+
+<div id="results">
+  {% with show_client = false, empty_message = "No hay tickets con estos filtros." if request.url.query else "Todavía no creaste ningún ticket." %}
+    {% include "tickets/_rows.html" %}
+  {% endwith %}
+</div>
 {% endblock %}

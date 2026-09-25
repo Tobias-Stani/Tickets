@@ -25,7 +25,18 @@ def test_client_pages_render(web, client_user, make_topic):
     login(web, client_user.email)
 
     assert web.get("/tickets").status_code == 200
-    assert "Selecciona un tema" in web.get("/tickets/new").text
+    assert "Sin tema" in web.get("/tickets/new").text
+
+
+def test_client_can_create_ticket_without_topics(web, htmx_post, client_user, session):
+    login(web, client_user.email)
+    assert 'name="subject"' in web.get("/tickets/new").text
+
+    htmx_post("/tickets", data={"subject": "Hola", "description": "Detalle"})
+
+    ticket = session.query(Ticket).one()
+    assert ticket.topic_id is None
+    assert "Sin tema" in web.get(f"/tickets/{ticket.id}").text
 
 
 def test_created_ticket_shows_detail_and_image(web, ticket_id, session):
@@ -70,3 +81,26 @@ def test_admin_filters_tickets_by_status(web, ticket_id, admin):
 
     assert "No funciona" in web.get("/admin/tickets?status=OPEN").text
     assert "No funciona" not in web.get("/admin/tickets?status=CLOSED").text
+
+
+def test_client_filters_tickets_by_status(web, ticket_id):
+    assert "No funciona" in web.get("/tickets?status=OPEN").text
+    assert "No funciona" not in web.get("/tickets?status=CLOSED").text
+
+
+def test_bell_shows_unread_count_until_ticket_is_viewed(
+    web, htmx_post, ticket_id, admin, session
+):
+    web.cookies.clear()
+    login(web, admin.email)
+    assert "1 ticket(s) con novedades" in web.get("/tickets/notifications").text
+    assert "No funciona" in web.get("/admin/tickets?unread=1").text
+
+    web.get(f"/tickets/{ticket_id}")
+
+    assert "Sin novedades" in web.get("/tickets/notifications").text
+    assert "No funciona" not in web.get("/admin/tickets?unread=1").text
+
+    htmx_post(f"/tickets/{ticket_id}/replies", data={"body": "Ya lo revisamos"})
+    session.refresh(ticket := session.get(Ticket, ticket_id))
+    assert ticket.status == TicketStatus.OPEN

@@ -24,6 +24,12 @@ class Settings(BaseSettings):
     @classmethod
     def use_psycopg_driver(cls, value: str) -> str:
         """Railway exposes `postgresql://`; SQLAlchemy needs the psycopg 3 driver."""
+        value = value.strip().strip("\"'")
+        if "://" not in value:
+            raise ValueError(
+                f"DATABASE_URL is not a database URL (got {value!r}). "
+                "On Railway, reference the Postgres service: ${{<service>.DATABASE_URL}}"
+            )
         for prefix in ("postgresql://", "postgres://"):
             if value.startswith(prefix):
                 return "postgresql+psycopg://" + value.removeprefix(prefix)

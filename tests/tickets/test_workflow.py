@@ -6,19 +6,22 @@ from app.core.errors import NotFoundError, PermissionDeniedError, ValidationErro
 from app.modules.tickets.models import Ticket, TicketStatus
 
 
-def test_admin_reply_marks_answered_and_keeps_history(workflow, open_ticket, admin):
+def test_admin_reply_keeps_status_and_history(workflow, open_ticket, admin):
+    workflow.change_status(admin, open_ticket.id, TicketStatus.IN_PROGRESS)
     workflow.reply(admin, open_ticket.id, "We are on it")
 
-    assert open_ticket.status == TicketStatus.ANSWERED
+    assert open_ticket.status == TicketStatus.IN_PROGRESS
+    assert open_ticket.unread_by_client
     assert [(m.author_id, m.body) for m in open_ticket.messages] == [(admin.id, "We are on it")]
 
 
-def test_client_reply_reopens_answered_ticket(workflow, open_ticket, admin, client_user):
-    workflow.reply(admin, open_ticket.id, "Try again")
+def test_client_reply_keeps_status_and_notifies_admin(workflow, open_ticket, admin, client_user):
+    workflow.change_status(admin, open_ticket.id, TicketStatus.ANSWERED)
+    open_ticket.unread_by_admin = False
     workflow.reply(client_user, open_ticket.id, "Still broken")
 
-    assert open_ticket.status == TicketStatus.OPEN
-    assert len(open_ticket.messages) == 2
+    assert open_ticket.status == TicketStatus.ANSWERED
+    assert open_ticket.unread_by_admin
 
 
 def test_any_reply_bumps_ticket_activity(workflow, open_ticket, client_user, session):

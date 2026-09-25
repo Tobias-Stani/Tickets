@@ -1,15 +1,14 @@
 from typing import Annotated
 
-from fastapi import APIRouter, Form, Query, Request
+from fastapi import APIRouter, Form, Request
 
 from app.core.templates import templates
 from app.modules.auth.dependencies import AdminUser, DbSession
-from app.modules.tickets.dependencies import Tickets, Workflow
+from app.modules.tickets.dependencies import Filters, Tickets, Workflow
 from app.modules.tickets.models import TicketStatus
-from app.modules.tickets.schemas import TicketFilters
 from app.modules.topics.service import TopicService
 from app.modules.users.service import UserService
-from app.shared.web import Pagination, optional_int, redirect
+from app.shared.web import Pagination, redirect
 
 router = APIRouter(tags=["admin"])
 
@@ -27,15 +26,8 @@ def all_tickets(
     tickets: Tickets,
     db: DbSession,
     params: Pagination,
-    status: Annotated[str, Query()] = "",
-    client_id: Annotated[str, Query()] = "",
-    topic_id: Annotated[str, Query()] = "",
+    filters: Filters,
 ):
-    filters = TicketFilters(
-        status=TicketStatus(status) if status in TicketStatus else None,
-        client_id=optional_int(client_id),
-        topic_id=optional_int(topic_id),
-    )
     context = {"page": tickets.list_all(filters, params), "filters": filters}
     return templates.TemplateResponse(
         request, "tickets/admin_list.html", context | _filter_options(db)

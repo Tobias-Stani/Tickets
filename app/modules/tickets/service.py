@@ -1,3 +1,4 @@
+from dataclasses import replace
 from uuid import uuid4
 
 from sqlalchemy.orm import Session
@@ -24,8 +25,24 @@ class TicketService:
     def get_for(self, actor: User, ticket_id: int) -> Ticket:
         return get_visible_ticket(self._tickets, actor, ticket_id)
 
-    def list_for_client(self, client: User, params: PageParams) -> Page[Ticket]:
-        return self._tickets.find_page(TicketFilters(client_id=client.id), params)
+    def open_for(self, actor: User, ticket_id: int) -> Ticket:
+        """Viewing a ticket clears the viewer's side unread flag."""
+        ticket = self.get_for(actor, ticket_id)
+        if actor.is_admin:
+            ticket.unread_by_admin = False
+        else:
+            ticket.unread_by_client = False
+        self._session.commit()
+        return ticket
+
+    def unread_count(self, actor: User) -> int:
+        client_id = None if actor.is_admin else actor.id
+        return self._tickets.count(TicketFilters(client_id=client_id, unread_by=actor.role))
+
+    def list_for_client(
+        self, client: User, filters: TicketFilters, params: PageParams
+    ) -> Page[Ticket]:
+        return self._tickets.find_page(replace(filters, client_id=client.id), params)
 
     def list_all(self, filters: TicketFilters, params: PageParams) -> Page[Ticket]:
         return self._tickets.find_page(filters, params)
@@ -43,7 +60,8 @@ class TicketService:
     def create(self, client: User, data: TicketCreate, files: list[ImageFile]) -> Ticket:
         ensure_client(client)
         images = validate_images(files)
-        self._ensure_topic_is_active(data.topic_id)
+        if data.topic_id is not None:
+            self._ensure_topic_is_active(data.topic_id)
         ticket = self._tickets.add(Ticket(client_id=client.id, **data.model_dump()))
         client.ticket_count = User.ticket_count + 1  # atomic increment in SQL
         self._commit_with_images(ticket, images)

@@ -2,28 +2,9 @@ import pytest
 
 from app.core.errors import ValidationError
 from app.modules.tickets.models import TicketStatus
-from app.modules.tickets.state_machine import (
-    ensure_accepts_replies,
-    ensure_can_change_status,
-    status_after_reply,
-)
-from app.modules.users.models import Role
+from app.modules.tickets.state_machine import ensure_accepts_replies, ensure_can_change_status
 
 OPEN, IN_PROGRESS, ANSWERED, CLOSED = TicketStatus
-
-
-@pytest.mark.parametrize("current", [OPEN, IN_PROGRESS, ANSWERED])
-def test_admin_reply_marks_ticket_answered(current):
-    assert status_after_reply(current, Role.ADMIN) == ANSWERED
-
-
-def test_client_reply_reopens_answered_ticket():
-    assert status_after_reply(ANSWERED, Role.CLIENT) == OPEN
-
-
-@pytest.mark.parametrize("current", [OPEN, IN_PROGRESS])
-def test_client_reply_keeps_status_when_not_answered(current):
-    assert status_after_reply(current, Role.CLIENT) == current
 
 
 @pytest.mark.parametrize("current", [OPEN, IN_PROGRESS, ANSWERED])

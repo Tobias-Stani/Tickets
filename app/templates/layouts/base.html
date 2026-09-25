@@ -6,6 +6,16 @@
   {# 4xx responses carry user-facing alerts: let HTMX swap them into the form target. #}
   <meta name="htmx-config" content='{"responseHandling":[{"code":"204","swap":false},{"code":"[23]..","swap":true},{"code":"4..","swap":true,"error":false},{"code":"...","swap":false,"error":true}]}'>
   <title>{% block title %}{{ app_name }}{% endblock %}</title>
+  {# Inline so the theme applies before first paint (no light flash). Defaults to the OS setting. #}
+  <script>
+    function storedTheme() { try { return localStorage.getItem("theme"); } catch { return null; } }
+    function toggleTheme() {
+      const dark = document.documentElement.classList.toggle("dark");
+      try { localStorage.setItem("theme", dark ? "dark" : "light"); } catch {}
+    }
+    document.documentElement.classList.toggle("dark",
+      storedTheme() ? storedTheme() === "dark" : matchMedia("(prefers-color-scheme: dark)").matches);
+  </script>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">

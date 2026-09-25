@@ -6,11 +6,12 @@
 <div class="mx-auto max-w-2xl">
   {{ ui.page_header("Nuevo ticket", "Cuéntanos qué necesitas y te responderemos a la brevedad.") }}
 
-  {% if topic_options %}
   <form class="card space-y-5" hx-post="/tickets" hx-encoding="multipart/form-data"
         hx-target="#form-alert" hx-disabled-elt="find button">
     {{ ui.form_alert() }}
-    {{ ui.select("topic_id", "Tema", topic_options, placeholder="Selecciona un tema") }}
+    {% if topic_options %}
+    {{ ui.select("topic_id", "Tema (opcional)", topic_options, placeholder="Sin tema", required=false) }}
+    {% endif %}
     {{ ui.field("subject", "Asunto", placeholder="Ej.: No puedo acceder a mi cuenta") }}
     {{ ui.textarea("description", "Descripción", placeholder="Describe el problema con el mayor detalle posible") }}
 
@@ -32,8 +33,5 @@
       <button class="btn-primary">Enviar ticket</button>
     </div>
   </form>
-  {% else %}
-  {{ ui.empty_state("No hay temas disponibles. Comunícate con el administrador.") }}
-  {% endif %}
 </div>
 {% endblock %}

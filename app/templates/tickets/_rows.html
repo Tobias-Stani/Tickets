@@ -3,17 +3,32 @@
 {% if page.items %}
 <ul class="card divide-y divide-slate-100 p-0! overflow-hidden">
   {% for ticket in page.items %}
+  {% set unread = ticket.unread_by_admin if user.is_admin else ticket.unread_by_client %}
   <li>
-    <a href="/tickets/{{ ticket.id }}" class="list-row">
+    <a href="/tickets/{{ ticket.id }}"
+       class="list-row {{ 'border-l-4 border-amber-500 bg-amber-50 hover:bg-amber-100' if unread }}">
       <div class="flex items-start justify-between gap-3">
         <div class="min-w-0">
-          <p class="truncate font-medium text-slate-900">#{{ ticket.id }} · {{ ticket.subject }}</p>
+          <p class="truncate text-slate-900 {{ 'font-semibold' if unread else 'font-medium' }}">#{{ ticket.id }} · {{ ticket.subject }}</p>
           <p class="mt-1 text-sm text-slate-500">
-            {% if show_client %}{{ ticket.client.full_name }} · {% endif %}{{ ticket.topic.name }}
-            · {{ ticket.updated_at | datetime }}
+            {% if show_client %}{{ ticket.client.full_name }} · {% endif %}{% if ticket.topic %}{{ ticket.topic.name }} · {% endif %}{{ ticket.updated_at | datetime }}
           </p>
+          {% if unread %}
+          <p class="mt-1.5 text-sm font-medium text-amber-700">Tenés novedades: revisá y respondé este ticket.</p>
+          {% endif %}
         </div>
-        {{ ui.status_badge(ticket.status) }}
+        <div class="flex shrink-0 flex-wrap justify-end gap-1.5">
+          {% if unread %}
+          <span class="badge gap-1.5 bg-amber-500 text-amber-950">
+            <span class="relative flex size-2">
+              <span class="absolute inline-flex size-full animate-ping rounded-full bg-amber-950 opacity-60"></span>
+              <span class="relative inline-flex size-2 rounded-full bg-amber-950"></span>
+            </span>
+            Novedades
+          </span>
+          {% endif %}
+          {{ ui.status_badge(ticket.status) }}
+        </div>
       </div>
     </a>
   </li>

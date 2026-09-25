@@ -8,6 +8,7 @@ from fastapi.responses import Response
 from app.core.templates import templates
 from app.modules.auth.dependencies import ClientUser, CurrentUser, DbSession
 from app.modules.tickets.dependencies import (
+    Filters,
     Tickets,
     Workflow,
     read_uploads,
@@ -22,9 +23,27 @@ router = APIRouter(prefix="/tickets", tags=["tickets"])
 
 
 @router.get("")
-def my_tickets(request: Request, client: ClientUser, tickets: Tickets, params: Pagination):
-    page = tickets.list_for_client(client, params)
-    return templates.TemplateResponse(request, "tickets/client_list.html", {"page": page})
+def my_tickets(
+    request: Request,
+    client: ClientUser,
+    tickets: Tickets,
+    db: DbSession,
+    params: Pagination,
+    filters: Filters,
+):
+    context = {
+        "page": tickets.list_for_client(client, filters, params),
+        "filters": filters,
+        "topic_options": [(t.id, t.name) for t in TopicService(db).list_all()],
+    }
+    return templates.TemplateResponse(request, "tickets/client_list.html", context)
+
+
+@router.get("/notifications")
+def notifications(request: Request, user: CurrentUser, tickets: Tickets):
+    """Polled by the header bell."""
+    context = {"unread": tickets.unread_count(user)}
+    return templates.TemplateResponse(request, "tickets/_notifications.html", context)
 
 
 @router.get("/new")
@@ -48,7 +67,7 @@ async def create_ticket(
 
 @router.get("/{ticket_id}")
 def ticket_detail(request: Request, user: CurrentUser, tickets: Tickets, ticket_id: int):
-    context = {"ticket": tickets.get_for(user, ticket_id)}
+    context = {"ticket": tickets.open_for(user, ticket_id)}
     return templates.TemplateResponse(request, "tickets/detail.html", context)
 
 

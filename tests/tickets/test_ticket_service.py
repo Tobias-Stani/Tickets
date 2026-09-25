@@ -47,6 +47,12 @@ def test_create_ticket_rejects_inactive_topic(create_ticket, client_user, make_t
         create_ticket(client_user, topic_id=retired.id)
 
 
+def test_create_ticket_without_topic(create_ticket, client_user):
+    ticket = create_ticket(client_user, topic_id=None)
+
+    assert ticket.topic is None
+
+
 def test_admin_cannot_create_tickets(create_ticket, admin):
     with pytest.raises(PermissionDeniedError):
         create_ticket(admin)
@@ -69,9 +75,47 @@ def test_list_for_client_only_returns_their_tickets(tickets, create_ticket, clie
     create_ticket(client_user)
     create_ticket(make_user())
 
-    page = tickets.list_for_client(client_user, PageParams())
+    page = tickets.list_for_client(client_user, TicketFilters(), PageParams())
 
     assert page.total == 1
+
+
+def test_list_for_client_ignores_client_filter_and_filters_status(
+    tickets, create_ticket, workflow, admin, client_user, make_user
+):
+    closed = create_ticket(client_user)
+    create_ticket(client_user)
+    other = create_ticket(make_user())
+    workflow.change_status(admin, closed.id, TicketStatus.CLOSED)
+
+    filters = TicketFilters(client_id=other.client_id, status=TicketStatus.CLOSED)
+    page = tickets.list_for_client(client_user, filters, PageParams())
+
+    assert [t.id for t in page.items] == [closed.id]
+
+
+def test_unread_flags_follow_replies_and_views(
+    tickets, workflow, open_ticket, admin, client_user
+):
+    assert tickets.unread_count(admin) == 1  # new ticket
+    assert tickets.unread_count(client_user) == 0
+
+    tickets.open_for(admin, open_ticket.id)
+    workflow.reply(admin, open_ticket.id, "On it")
+    assert (tickets.unread_count(admin), tickets.unread_count(client_user)) == (0, 1)
+
+    tickets.open_for(client_user, open_ticket.id)
+    workflow.reply(client_user, open_ticket.id, "Thanks")
+    assert (tickets.unread_count(admin), tickets.unread_count(client_user)) == (1, 0)
+
+
+def test_client_unread_count_only_counts_their_tickets(
+    tickets, workflow, create_ticket, admin, client_user, make_user
+):
+    other = create_ticket(make_user())
+    workflow.reply(admin, other.id, "Hi")
+
+    assert tickets.unread_count(client_user) == 0
 
 
 def test_admin_list_filters_by_client_and_status(

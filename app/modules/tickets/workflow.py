@@ -5,11 +5,7 @@ from app.core.errors import ValidationError
 from app.modules.tickets.access import ensure_admin, get_visible_ticket
 from app.modules.tickets.models import Ticket, TicketMessage, TicketStatus
 from app.modules.tickets.repository import TicketRepository
-from app.modules.tickets.state_machine import (
-    ensure_accepts_replies,
-    ensure_can_change_status,
-    status_after_reply,
-)
+from app.modules.tickets.state_machine import ensure_accepts_replies, ensure_can_change_status
 from app.modules.users.models import User
 
 
@@ -26,8 +22,11 @@ class TicketWorkflow:
         ensure_accepts_replies(ticket.status)
         message = TicketMessage(author_id=actor.id, body=self._clean_body(body))
         ticket.messages.append(message)
-        ticket.status = status_after_reply(ticket.status, actor.role)
-        ticket.updated_at = func.now()  # status may not change; activity still counts
+        if actor.is_admin:
+            ticket.unread_by_client = True
+        else:
+            ticket.unread_by_admin = True
+        ticket.updated_at = func.now()  # status doesn't change; activity still counts
         self._session.commit()
         return message
 

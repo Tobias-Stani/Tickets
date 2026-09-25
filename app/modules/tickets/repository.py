@@ -2,6 +2,7 @@ from sqlalchemy import Select, func, select
 
 from app.modules.tickets.models import Ticket, TicketStatus
 from app.modules.tickets.schemas import TicketFilters
+from app.modules.users.models import Role
 from app.shared.pagination import Page, PageParams, paginate
 from app.shared.repository import SqlRepository
 
@@ -12,6 +13,10 @@ class TicketRepository(SqlRepository[Ticket]):
 
     def find_page(self, filters: TicketFilters, params: PageParams) -> Page[Ticket]:
         return paginate(self.session, self._filtered_query(filters), params)
+
+    def count(self, filters: TicketFilters) -> int:
+        query = self._filtered_query(filters).order_by(None).subquery()
+        return self.session.scalar(select(func.count()).select_from(query)) or 0
 
     def count_by_status(self) -> dict[TicketStatus, int]:
         rows = self.session.execute(select(Ticket.status, func.count()).group_by(Ticket.status))
@@ -27,4 +32,8 @@ class TicketRepository(SqlRepository[Ticket]):
             query = query.where(Ticket.client_id == filters.client_id)
         if filters.topic_id:
             query = query.where(Ticket.topic_id == filters.topic_id)
+        if filters.unread_by == Role.ADMIN:
+            query = query.where(Ticket.unread_by_admin)
+        elif filters.unread_by == Role.CLIENT:
+            query = query.where(Ticket.unread_by_client)
         return query

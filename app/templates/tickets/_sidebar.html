@@ -3,7 +3,7 @@
   <dl class="card space-y-4 text-sm">
     {% set rows = [
       ("Cliente", ticket.client.full_name),
-      ("Tema", ticket.topic.name),
+      ("Tema", ticket.topic.name if ticket.topic else "Sin tema"),
       ("Creado", ticket.created_at | datetime),
       ("Última actividad", ticket.updated_at | datetime),
     ] %}

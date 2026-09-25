@@ -5,15 +5,7 @@
 {% block content %}
 {{ ui.page_header("Tickets", "Todos los tickets de tus clientes.") }}
 
-{# Filters submit on change; HTMX swaps only the results and keeps the URL shareable. #}
-<form method="get" action="/admin/tickets" class="card mb-4 grid gap-3 sm:grid-cols-3"
-      hx-get="/admin/tickets" hx-trigger="change" hx-target="#results" hx-select="#results"
-      hx-swap="outerHTML" hx-push-url="true">
-  {{ ui.select("status", "Estado", status_options(), filters.status.value if filters.status else "", "Todos", required=false) }}
-  {{ ui.select("client_id", "Cliente", client_options, filters.client_id or "", "Todos", required=false) }}
-  {{ ui.select("topic_id", "Tema", topic_options, filters.topic_id or "", "Todos", required=false) }}
-  <noscript><button class="btn-primary sm:col-span-3">Filtrar</button></noscript>
-</form>
+{% include "tickets/_filters.html" %}
 
 <div id="results">
   {% with show_client = true, empty_message = "No hay tickets con estos filtros." %}

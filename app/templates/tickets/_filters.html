@@ -1,0 +1,18 @@
+{# Ticket list filters, shared by client and admin lists. Pass `client_options` to filter by client.
+   Submit on change; HTMX swaps only the results and keeps the URL shareable. #}
+{% set path = request.url.path %}
+<form method="get" action="{{ path }}"
+      class="card mb-4 grid gap-3 sm:grid-cols-2 {{ 'lg:grid-cols-4' if client_options else 'lg:grid-cols-3' }} sm:items-end"
+      hx-get="{{ path }}" hx-trigger="change" hx-target="#results" hx-select="#results"
+      hx-swap="outerHTML" hx-push-url="true">
+  {{ ui.select("status", "Estado", status_options(), filters.status.value if filters.status else "", "Todos", required=false) }}
+  {% if client_options %}
+  {{ ui.select("client_id", "Cliente", client_options, filters.client_id or "", "Todos", required=false) }}
+  {% endif %}
+  {{ ui.select("topic_id", "Tema", topic_options, filters.topic_id or "", "Todos", required=false) }}
+  <label class="flex items-center gap-2 py-2.5 text-sm font-medium text-slate-700">
+    <input type="checkbox" name="unread" value="1" class="size-4 accent-indigo-600" {{ "checked" if filters.unread_by }}>
+    Solo con novedades
+  </label>
+  <noscript><button class="btn-primary">Filtrar</button></noscript>
+</form>

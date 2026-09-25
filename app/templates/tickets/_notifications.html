@@ -1,0 +1,12 @@
+{% import "components/icons.html" as icons %}
+{% set list_url = "/admin/tickets" if current_user(request).is_admin else "/tickets" %}
+<a href="{{ list_url }}?unread=1" class="btn-secondary relative px-2.5"
+   title="{{ unread ~ ' ticket(s) con novedades' if unread else 'Sin novedades' }}">
+  {{ icons.icon("bell", "size-5") }}
+  <span class="sr-only">Notificaciones</span>
+  {% if unread %}
+  <span class="absolute -top-1.5 -right-1.5 grid min-w-5 place-items-center rounded-full bg-red-500 px-1 text-[11px] font-semibold text-on-accent">
+    {{ unread if unread < 100 else "99+" }}
+  </span>
+  {% endif %}
+</a>

@@ -60,7 +60,7 @@ Soft delete (`is_active = false`) so historical tickets keep their topic.
 | ------------ | -------- | ------------------------------ |
 | id           | int PK   |                                |
 | client_id    | FK User  |                                |
-| topic_id     | FK Topic | only active topics selectable  |
+| topic_id     | FK Topic | optional; only active topics selectable |
 | subject      | str      |                                |
 | description  | text     |                                |
 | status       | enum     | see state machine              |
@@ -81,10 +81,13 @@ States: `OPEN`, `IN_PROGRESS`, `ANSWERED`, `CLOSED`.
 | Event                                  | Resulting status        |
 | -------------------------------------- | ----------------------- |
 | Client creates ticket                  | `OPEN`                  |
-| Admin replies                          | `ANSWERED`              |
-| Client replies to `ANSWERED` ticket    | `OPEN`                  |
 | Admin takes the ticket                 | `IN_PROGRESS` (manual)  |
+| Admin marks it answered                | `ANSWERED` (manual)     |
 | Admin closes the ticket                | `CLOSED` (manual)       |
+
+Replies never change the status. They flag the ticket as unread for the other
+side (`unread_by_admin` / `unread_by_client`); opening the ticket clears the
+viewer's flag. The header bell polls `/tickets/notifications` for the count.
 
 Rules (enforced in the service layer, never only in the UI):
 
