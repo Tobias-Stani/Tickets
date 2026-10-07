@@ -3,7 +3,7 @@
 {% block title %}Inicio · {{ app_name }}{% endblock %}
 
 {% block content %}
-{{ ui.page_header("Hola, " ~ user.full_name, "Este es el resumen de tus tickets.") }}
+{{ ui.page_header("Hola, " ~ user.full_name, "Este es el resumen de tus consultas.") }}
 
 <section class="grid grid-cols-2 gap-3 sm:gap-4 lg:grid-cols-4">
   {% set accents = {
@@ -21,10 +21,10 @@
 <h2 class="mt-10 mb-4 text-sm font-semibold tracking-wide text-slate-500 uppercase">Accesos rápidos</h2>
 <section class="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
   {% set shortcuts = [
-    ("/admin/tickets", "ticket", "Ver tickets", "Todos los tickets y filtros"),
+    ("/admin/tickets", "ticket", "Ver consultas", "Todas las consultas y filtros"),
     ("/admin/users/new", "users", "Nuevo usuario", "Crear cliente o administrador"),
     ("/admin/tags", "tag", "Etiquetas", "Planes y categorías de clientes"),
-    ("/admin/topics", "folder", "Temas", "Temas disponibles para tickets"),
+    ("/admin/topics", "folder", "Temas", "Temas disponibles para consultas"),
   ] %}
   {% for url, icon, title, description in shortcuts %}
   <a href="{{ url }}" class="card flex items-start gap-4 transition hover:border-indigo-300 hover:shadow-md">

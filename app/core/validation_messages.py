@@ -13,6 +13,7 @@ FIELD_LABELS = {
     "description": "Descripción",
     "body": "Respuesta",
     "status": "Estado",
+    "urgency": "Urgencia",
 }
 
 

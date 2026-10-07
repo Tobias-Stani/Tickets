@@ -14,7 +14,7 @@
             {% if show_client %}{{ ticket.client.full_name }} · {% endif %}{% if ticket.topic %}{{ ticket.topic.name }} · {% endif %}{{ ticket.updated_at | datetime }}
           </p>
           {% if unread %}
-          <p class="mt-1.5 text-sm font-medium text-amber-700">Tenés novedades: revisá y respondé este ticket.</p>
+          <p class="mt-1.5 text-sm font-medium text-amber-700">Tenés novedades: revisá y respondé esta consulta.</p>
           {% endif %}
         </div>
         <div class="flex shrink-0 flex-wrap justify-end gap-1.5">
@@ -27,6 +27,7 @@
             Novedades
           </span>
           {% endif %}
+          {{ ui.urgency_badge(ticket.urgency) }}
           {{ ui.status_badge(ticket.status) }}
         </div>
       </div>

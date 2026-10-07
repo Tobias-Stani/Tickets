@@ -27,7 +27,7 @@
           {{ item.full_name }} {{ ui.active_badge(item.is_active) }}
         </p>
         <p class="mt-0.5 truncate text-sm text-slate-500">{{ item.email }} · {{ role_label(item.role) }}
-          {% if not item.is_admin %} · {{ item.ticket_count }} tickets{% endif %}</p>
+          {% if not item.is_admin %} · {{ item.ticket_count }} consultas{% endif %}</p>
         {% if item.tags %}<div class="mt-2 flex flex-wrap gap-1">{% for tag in item.tags %}{{ ui.tag_badge(tag) }}{% endfor %}</div>{% endif %}
       </a>
       <div class="flex shrink-0 gap-2">

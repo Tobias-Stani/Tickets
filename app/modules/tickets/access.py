@@ -22,4 +22,4 @@ def ensure_admin(actor: User) -> None:
 
 def ensure_client(actor: User) -> None:
     if actor.is_admin:
-        raise PermissionDeniedError("Solo los clientes pueden crear tickets.")
+        raise PermissionDeniedError("Solo los clientes pueden crear consultas.")

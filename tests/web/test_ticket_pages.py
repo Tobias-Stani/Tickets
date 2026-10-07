@@ -1,7 +1,7 @@
 import pytest
 
-from app.models import Ticket
-from app.modules.tickets.models import TicketStatus
+from app.models import Tag, Ticket
+from app.modules.tickets.models import TicketStatus, TicketUrgency
 from tests.tickets.images import PNG
 from tests.web.conftest import login
 
@@ -44,7 +44,7 @@ def test_created_ticket_shows_detail_and_image(web, ticket_id, session):
     image_id = session.get(Ticket, ticket_id).images[0].id
 
     assert "No funciona" in page.text
-    assert "Ticket creado" in page.text
+    assert "Consulta creada" in page.text
     image = web.get(f"/tickets/{ticket_id}/images/{image_id}")
     assert (image.content, image.headers["content-type"]) == (PNG, "image/png")
 
@@ -72,7 +72,7 @@ def test_admin_reply_and_close_flow(web, htmx_post, ticket_id, admin, client_use
     login(web, client_user.email)
     response = htmx_post(f"/tickets/{ticket_id}/replies", data={"body": "Hola?"})
     assert response.status_code == 422
-    assert "está cerrado" in response.text
+    assert "está cerrada" in response.text
 
 
 def test_admin_filters_tickets_by_status(web, ticket_id, admin):
@@ -93,7 +93,7 @@ def test_bell_shows_unread_count_until_ticket_is_viewed(
 ):
     web.cookies.clear()
     login(web, admin.email)
-    assert "1 ticket(s) con novedades" in web.get("/tickets/notifications").text
+    assert "1 consulta(s) con novedades" in web.get("/tickets/notifications").text
     assert "No funciona" in web.get("/admin/tickets?unread=1").text
 
     web.get(f"/tickets/{ticket_id}")
@@ -104,3 +104,30 @@ def test_bell_shows_unread_count_until_ticket_is_viewed(
     htmx_post(f"/tickets/{ticket_id}/replies", data={"body": "Ya lo revisamos"})
     session.refresh(ticket := session.get(Ticket, ticket_id))
     assert ticket.status == TicketStatus.OPEN
+
+
+def test_client_sets_urgency_and_sees_it(web, htmx_post, client_user, session):
+    login(web, client_user.email)
+    htmx_post("/tickets", data={"subject": "Urge", "description": "Ya", "urgency": "HIGH"})
+
+    ticket = session.query(Ticket).one()
+    assert ticket.urgency == TicketUrgency.HIGH
+    assert "Urgencia alta" in web.get("/tickets").text
+
+
+def test_invalid_urgency_is_rejected(web, htmx_post, client_user, session):
+    login(web, client_user.email)
+    response = htmx_post("/tickets", data={"subject": "A", "description": "B", "urgency": "MAX"})
+
+    assert response.status_code == 422
+    assert "Urgencia" in response.text
+    assert session.query(Ticket).count() == 0
+
+
+def test_client_sees_own_tags_on_home(web, client_user, session):
+    tag = Tag(name="Plan Pro", color="#4f46e5")
+    client_user.tags.append(tag)
+    session.commit()
+    login(web, client_user.email)
+
+    assert "Plan Pro" in web.get("/tickets").text

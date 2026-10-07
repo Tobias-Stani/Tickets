@@ -7,7 +7,7 @@ from pydantic_settings import BaseSettings, SettingsConfigDict
 class Settings(BaseSettings):
     model_config = SettingsConfigDict(env_file=".env", extra="ignore")
 
-    app_name: str = "Tickets"
+    app_name: str = "Consultas"
     timezone: str = "America/Argentina/Buenos_Aires"
     debug: bool = False
     secret_key: str

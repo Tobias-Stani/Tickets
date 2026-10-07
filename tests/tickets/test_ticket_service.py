@@ -2,7 +2,7 @@ import pytest
 
 from app.core.errors import NotFoundError, PermissionDeniedError, ValidationError
 from app.modules.tickets.images import ImageFile
-from app.modules.tickets.models import TicketStatus
+from app.modules.tickets.models import TicketStatus, TicketUrgency
 from app.modules.tickets.schemas import TicketFilters
 from app.shared.pagination import PageParams
 from tests.tickets.images import JPEG, PNG
@@ -13,6 +13,7 @@ def test_create_ticket_starts_open_and_increments_counter(create_ticket, client_
     create_ticket(client_user)
 
     assert ticket.status == TicketStatus.OPEN
+    assert ticket.urgency == TicketUrgency.LOW
     assert ticket.client_id == client_user.id
     assert client_user.ticket_count == 2
 

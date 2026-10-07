@@ -1,14 +1,15 @@
 {% extends "layouts/app.html" %}
 
-{% block title %}Nuevo ticket · {{ app_name }}{% endblock %}
+{% block title %}Nueva consulta · {{ app_name }}{% endblock %}
 
 {% block content %}
 <div class="mx-auto max-w-2xl">
-  {{ ui.page_header("Nuevo ticket", "Cuéntanos qué necesitas y te responderemos a la brevedad.") }}
+  {{ ui.page_header("Nueva consulta", "Cuéntanos qué necesitas y te responderemos a la brevedad.") }}
 
   <form class="card space-y-5" hx-post="/tickets" hx-encoding="multipart/form-data"
         hx-target="#form-alert" hx-disabled-elt="find button">
     {{ ui.form_alert() }}
+    {{ ui.select("urgency", "Urgencia", urgency_options(), "LOW") }}
     {% if topic_options %}
     {{ ui.select("topic_id", "Tema (opcional)", topic_options, placeholder="Sin tema", required=false) }}
     {% endif %}
@@ -30,7 +31,7 @@
 
     <div class="flex flex-col-reverse gap-3 sm:flex-row sm:justify-end">
       <a href="/tickets" class="btn-secondary">Cancelar</a>
-      <button class="btn-primary">Enviar ticket</button>
+      <button class="btn-primary">Enviar consulta</button>
     </div>
   </form>
 </div>

@@ -1,14 +1,14 @@
 {% extends "layouts/app.html" %}
 
-{% block title %}Tickets · {{ app_name }}{% endblock %}
+{% block title %}Consultas · {{ app_name }}{% endblock %}
 
 {% block content %}
-{{ ui.page_header("Tickets", "Todos los tickets de tus clientes.") }}
+{{ ui.page_header("Consultas", "Todas las consultas de tus clientes.") }}
 
 {% include "tickets/_filters.html" %}
 
 <div id="results">
-  {% with show_client = true, empty_message = "No hay tickets con estos filtros." %}
+  {% with show_client = true, empty_message = "No hay consultas con estos filtros." %}
     {% include "tickets/_rows.html" %}
   {% endwith %}
 </div>

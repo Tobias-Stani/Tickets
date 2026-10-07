@@ -16,6 +16,12 @@ class TicketStatus(StrEnum):
     CLOSED = "CLOSED"
 
 
+class TicketUrgency(StrEnum):
+    LOW = "LOW"
+    MEDIUM = "MEDIUM"
+    HIGH = "HIGH"
+
+
 class Ticket(TimestampMixin, Base):
     __tablename__ = "tickets"
 
@@ -26,6 +32,11 @@ class Ticket(TimestampMixin, Base):
     description: Mapped[str] = mapped_column(Text)
     status: Mapped[TicketStatus] = mapped_column(
         Enum(TicketStatus, native_enum=False, length=20), default=TicketStatus.OPEN, index=True
+    )
+    urgency: Mapped[TicketUrgency] = mapped_column(
+        Enum(TicketUrgency, native_enum=False, length=10),
+        default=TicketUrgency.LOW,
+        server_default=TicketUrgency.MEDIUM.value,
     )
     # Each side's "new activity" flag: set by the other side's reply, cleared on viewing.
     unread_by_admin: Mapped[bool] = mapped_column(default=True, server_default=false())

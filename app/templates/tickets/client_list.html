@@ -1,16 +1,22 @@
 {% extends "layouts/app.html" %}
 
-{% block title %}Mis tickets · {{ app_name }}{% endblock %}
+{% block title %}Mis consultas · {{ app_name }}{% endblock %}
 
 {% block content %}
-{% call ui.page_header("Mis tickets", "Consulta el estado de tus tickets.") %}
-  <a href="/tickets/new" class="btn-primary">{{ icons.icon("plus", "size-4") }}Nuevo ticket</a>
+{% call ui.page_header("Mis consultas", "Revisá el estado de tus consultas.") %}
+  <a href="/tickets/new" class="btn-primary">{{ icons.icon("plus", "size-4") }}Nueva consulta</a>
 {% endcall %}
+
+<div class="mb-4 flex flex-wrap items-center gap-2 text-sm">
+  {{ icons.icon("users", "size-4 text-slate-500") }}
+  <span class="font-medium text-slate-900">{{ user.full_name }}</span>
+  {% for tag in user.tags %}{{ ui.tag_badge(tag) }}{% endfor %}
+</div>
 
 {% include "tickets/_filters.html" %}
 
 <div id="results">
-  {% with show_client = false, empty_message = "No hay tickets con estos filtros." if request.url.query else "Todavía no creaste ningún ticket." %}
+  {% with show_client = false, empty_message = "No hay consultas con estos filtros." if request.url.query else "Todavía no creaste ninguna consulta." %}
     {% include "tickets/_rows.html" %}
   {% endwith %}
 </div>

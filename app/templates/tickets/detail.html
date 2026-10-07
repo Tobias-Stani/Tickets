@@ -1,6 +1,6 @@
 {% extends "layouts/app.html" %}
 
-{% block title %}Ticket #{{ ticket.id }} · {{ app_name }}{% endblock %}
+{% block title %}Consulta #{{ ticket.id }} · {{ app_name }}{% endblock %}
 
 {% block content %}
 {% set back_url = "/admin/tickets" if user.is_admin else "/tickets" %}
@@ -33,7 +33,7 @@
     {% include "tickets/_conversation.html" %}
 
     {% if is_closed %}
-      {{ ui.alert("Este ticket está cerrado. Para continuar es necesario crear un ticket nuevo.") }}
+      {{ ui.alert("Esta consulta está cerrada. Para continuar es necesario crear una consulta nueva.") }}
     {% else %}
     <form class="card space-y-4" hx-post="/tickets/{{ ticket.id }}/replies" hx-target="#form-alert"
           hx-disabled-elt="find button">

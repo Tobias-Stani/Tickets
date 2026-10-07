@@ -4,7 +4,7 @@ from datetime import UTC, datetime
 from zoneinfo import ZoneInfo
 
 from app.core.config import get_settings
-from app.modules.tickets.models import TicketStatus
+from app.modules.tickets.models import TicketStatus, TicketUrgency
 from app.modules.users.models import Role
 
 STATUS_LABELS = {
@@ -14,7 +14,21 @@ STATUS_LABELS = {
     TicketStatus.CLOSED: "Cerrado",
 }
 
+URGENCY_LABELS = {
+    TicketUrgency.LOW: "Baja",
+    TicketUrgency.MEDIUM: "Media",
+    TicketUrgency.HIGH: "Alta",
+}
+
 ROLE_LABELS = {Role.ADMIN: "Administrador", Role.CLIENT: "Cliente"}
+
+
+def urgency_label(urgency: TicketUrgency) -> str:
+    return URGENCY_LABELS[urgency]
+
+
+def urgency_options() -> list[tuple[str, str]]:
+    return [(urgency.value, label) for urgency, label in URGENCY_LABELS.items()]
 
 
 def status_label(status: TicketStatus) -> str:

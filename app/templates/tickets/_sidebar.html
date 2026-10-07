@@ -4,6 +4,7 @@
     {% set rows = [
       ("Cliente", ticket.client.full_name),
       ("Tema", ticket.topic.name if ticket.topic else "Sin tema"),
+      ("Urgencia", urgency_label(ticket.urgency)),
       ("Creado", ticket.created_at | datetime),
       ("Última actividad", ticket.updated_at | datetime),
     ] %}
@@ -26,7 +27,7 @@
     <div id="status-alert" class="empty:hidden"></div>
     {{ ui.select("status", "Cambiar estado", status_options(), ticket.status.value) }}
     <button class="btn-primary w-full">Guardar estado</button>
-    <p class="text-xs text-slate-500">Al cerrar el ticket ya no se podrá responder ni reabrir.</p>
+    <p class="text-xs text-slate-500">Al cerrar la consulta ya no se podrá responder ni reabrir.</p>
   </form>
   {% endif %}
 </aside>

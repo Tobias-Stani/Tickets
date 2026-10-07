@@ -11,6 +11,8 @@ from app.shared.labels import (
     role_options,
     status_label,
     status_options,
+    urgency_label,
+    urgency_options,
 )
 from app.shared.navigation import nav_for
 from app.shared.web import pop_flash
@@ -35,5 +37,7 @@ templates.env.globals.update(
     role_label=role_label,
     role_options=role_options,
     status_options=status_options,
+    urgency_label=urgency_label,
+    urgency_options=urgency_options,
 )
 templates.env.filters["datetime"] = format_datetime

@@ -69,6 +69,15 @@
   <span class="badge {{ styles[status] }}">{{ status_label(status) }}</span>
 {%- endmacro %}
 
+{% macro urgency_badge(urgency) -%}
+  {% set styles = {
+    "LOW": "bg-slate-200 text-slate-600",
+    "MEDIUM": "bg-sky-100 text-sky-700",
+    "HIGH": "bg-red-500 text-on-accent",
+  } %}
+  <span class="badge {{ styles[urgency] }}">Urgencia {{ urgency_label(urgency) | lower }}</span>
+{%- endmacro %}
+
 {% macro active_badge(is_active) -%}
   {% if is_active %}<span class="badge bg-emerald-100 text-emerald-700">Activo</span>
   {% else %}<span class="badge bg-slate-200 text-slate-600">Inactivo</span>{% endif %}

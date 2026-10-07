@@ -62,7 +62,7 @@ async def create_ticket(
     images: Annotated[list[UploadFile], File()] = [],  # noqa: B006  FastAPI form default
 ):
     ticket = tickets.create(client, data, await read_uploads(images))
-    return redirect(request, f"/tickets/{ticket.id}", "Ticket creado. Te responderemos pronto.")
+    return redirect(request, f"/tickets/{ticket.id}", "Consulta creada. Te responderemos pronto.")
 
 
 @router.get("/{ticket_id}")

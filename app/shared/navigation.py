@@ -16,15 +16,15 @@ class NavItem:
 
 ADMIN_NAV = (
     NavItem("Inicio", "/admin", "home", exact=True),
-    NavItem("Tickets", "/admin/tickets", "ticket"),
+    NavItem("Consultas", "/admin/tickets", "ticket"),
     NavItem("Usuarios", "/admin/users", "users"),
     NavItem("Etiquetas", "/admin/tags", "tag"),
     NavItem("Temas", "/admin/topics", "folder"),
 )
 
 CLIENT_NAV = (
-    NavItem("Mis tickets", "/tickets", "ticket", exact=True),
-    NavItem("Nuevo ticket", "/tickets/new", "plus"),
+    NavItem("Mis consultas", "/tickets", "ticket", exact=True),
+    NavItem("Nueva consulta", "/tickets/new", "plus"),
 )
 
 

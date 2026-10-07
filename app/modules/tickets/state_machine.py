@@ -13,10 +13,10 @@ from app.modules.tickets.models import TicketStatus
 def ensure_accepts_replies(current: TicketStatus) -> None:
     if current == TicketStatus.CLOSED:
         raise ValidationError(
-            "Este ticket está cerrado. Para continuar es necesario crear un ticket nuevo."
+            "Esta consulta está cerrada. Para continuar es necesario crear una consulta nueva."
         )
 
 
 def ensure_can_change_status(current: TicketStatus, target: TicketStatus) -> None:
     if current == TicketStatus.CLOSED:
-        raise ValidationError("Los tickets cerrados no se pueden modificar.")
+        raise ValidationError("Las consultas cerradas no se pueden modificar.")

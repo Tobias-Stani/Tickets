@@ -8,7 +8,7 @@ from app.core.storage import Storage
 from app.modules.auth.dependencies import CurrentUser, DbSession
 from app.modules.files.storage import get_storage
 from app.modules.tickets.images import MAX_IMAGE_BYTES, ImageFile
-from app.modules.tickets.models import TicketStatus
+from app.modules.tickets.models import TicketStatus, TicketUrgency
 from app.modules.tickets.schemas import TicketCreate, TicketFilters
 from app.modules.tickets.service import TicketService
 from app.modules.tickets.workflow import TicketWorkflow
@@ -36,12 +36,16 @@ def ticket_create_form(
     subject: Annotated[str, Form()],
     description: Annotated[str, Form()],
     topic_id: Annotated[str, Form()] = "",
+    urgency: Annotated[str, Form()] = TicketUrgency.LOW.value,
 ) -> TicketCreate:
     """Multipart routes can't bind a Pydantic model as Form() next to File() params,
     so the model is built here and its errors re-raised as request validation errors."""
     try:
         return TicketCreate(
-            topic_id=optional_int(topic_id), subject=subject, description=description
+            topic_id=optional_int(topic_id),
+            urgency=urgency,
+            subject=subject,
+            description=description,
         )
     except ValidationError as error:
         raise RequestValidationError(error.errors()) from error

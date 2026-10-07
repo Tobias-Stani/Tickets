@@ -3,7 +3,7 @@
 {% block title %}Temas · {{ app_name }}{% endblock %}
 
 {% block content %}
-{{ ui.page_header("Temas", "Los clientes eligen un tema al crear un ticket.") }}
+{{ ui.page_header("Temas", "Los clientes eligen un tema al crear una consulta.") }}
 
 <form class="card mb-6 grid gap-3 sm:grid-cols-[1fr_auto] sm:items-end" hx-post="/admin/topics"
       hx-target="#form-alert" hx-disabled-elt="find button">
@@ -31,8 +31,8 @@
   </li>
   {% endfor %}
 </ul>
-<p class="mt-3 text-xs text-slate-500">Los temas desactivados no se ofrecen en tickets nuevos, pero se conservan en los existentes.</p>
+<p class="mt-3 text-xs text-slate-500">Los temas desactivados no se ofrecen en consultas nuevas, pero se conservan en los existentes.</p>
 {% else %}
-{{ ui.empty_state("Todavía no hay temas. Crea al menos uno para que los clientes puedan abrir tickets.") }}
+{{ ui.empty_state("Todavía no hay temas. Crea al menos uno para que los clientes puedan abrir consultas.") }}
 {% endif %}
 {% endblock %}

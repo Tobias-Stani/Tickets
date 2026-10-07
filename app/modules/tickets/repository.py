@@ -9,7 +9,7 @@ from app.shared.repository import SqlRepository
 
 class TicketRepository(SqlRepository[Ticket]):
     model = Ticket
-    not_found_message = "Ticket no encontrado"
+    not_found_message = "Consulta no encontrada"
 
     def find_page(self, filters: TicketFilters, params: PageParams) -> Page[Ticket]:
         return paginate(self.session, self._filtered_query(filters), params)
