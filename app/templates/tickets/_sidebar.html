@@ -1,8 +1,21 @@
 {# Ticket metadata; admins also get the status control. #}
 <aside class="space-y-6">
   <dl class="card space-y-4 text-sm">
+    <div>
+      <dt class="text-slate-500">Cliente</dt>
+      <dd class="mt-0.5 font-medium text-slate-900">{{ ticket.client.full_name }}</dd>
+    </div>
+    {% if user.is_admin %}
+    <div>
+      <dt class="text-slate-500">Email del cliente</dt>
+      <dd class="mt-0.5 font-medium break-all">
+        <button type="button" title="Copiar email" data-email="{{ ticket.client.email }}"
+                class="cursor-pointer text-left text-indigo-600 hover:underline"
+                onclick="navigator.clipboard.writeText(this.dataset.email).then(() => { this.textContent = '¡Copiado!'; setTimeout(() => this.textContent = this.dataset.email, 1500); })">{{ ticket.client.email }}</button>
+      </dd>
+    </div>
+    {% endif %}
     {% set rows = [
-      ("Cliente", ticket.client.full_name),
       ("Tema", ticket.topic.name if ticket.topic else "Sin tema"),
       ("Urgencia", urgency_label(ticket.urgency)),
       ("Creado", ticket.created_at | datetime),

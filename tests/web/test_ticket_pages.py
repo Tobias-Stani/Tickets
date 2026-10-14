@@ -131,3 +131,11 @@ def test_client_sees_own_tags_on_home(web, client_user, session):
     login(web, client_user.email)
 
     assert "Plan Pro" in web.get("/tickets").text
+
+
+def test_only_admin_sees_client_email_on_detail(web, ticket_id, admin, client_user):
+    assert f'data-email="{client_user.email}"' not in web.get(f"/tickets/{ticket_id}").text
+
+    web.cookies.clear()
+    login(web, admin.email)
+    assert f'data-email="{client_user.email}"' in web.get(f"/tickets/{ticket_id}").text
