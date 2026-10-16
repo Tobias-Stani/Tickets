@@ -2,7 +2,7 @@ import pytest
 
 from app.models import Tag, Ticket
 from app.modules.tickets.models import TicketStatus, TicketUrgency
-from tests.tickets.images import PNG
+from tests.tickets.images import DOCX, PNG
 from tests.web.conftest import login
 
 
@@ -139,3 +139,26 @@ def test_only_admin_sees_client_email_on_detail(web, ticket_id, admin, client_us
     web.cookies.clear()
     login(web, admin.email)
     assert f'data-email="{client_user.email}"' in web.get(f"/tickets/{ticket_id}").text
+
+
+def test_reply_with_document_is_listed_and_downloads(web, htmx_post, ticket_id, session):
+    files = [("files", ("informe.docx", DOCX, "application/octet-stream"))]
+    htmx_post(f"/tickets/{ticket_id}/replies", data={"body": "Adjunto"}, files=files)
+
+    [attachment] = session.get(Ticket, ticket_id).messages[0].attachments
+    assert "informe.docx" in web.get(f"/tickets/{ticket_id}").text
+    download = web.get(f"/tickets/{ticket_id}/images/{attachment.id}")
+    assert download.content == DOCX
+    assert download.headers["content-disposition"] == "attachment; filename*=UTF-8''informe.docx"
+
+
+def test_other_client_cannot_download_reply_attachment(
+    web, htmx_post, ticket_id, session, make_user
+):
+    files = [("files", ("informe.docx", DOCX, "application/octet-stream"))]
+    htmx_post(f"/tickets/{ticket_id}/replies", data={"body": ""}, files=files)
+    [attachment] = session.get(Ticket, ticket_id).messages[0].attachments
+
+    web.cookies.clear()
+    login(web, make_user().email)
+    assert web.get(f"/tickets/{ticket_id}/images/{attachment.id}").status_code == 404

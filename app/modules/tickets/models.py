@@ -54,17 +54,32 @@ class Ticket(TimestampMixin, Base):
         lazy="selectin",
     )
 
+    @property
+    def description_images(self) -> list["TicketImage"]:
+        """Attachments sent with the ticket itself (reply attachments have a message_id)."""
+        return [image for image in self.images if image.message_id is None]
+
 
 class TicketImage(Base):
+    """An attachment (image or document) of a ticket, optionally tied to one of its replies."""
+
     __tablename__ = "ticket_images"
 
     id: Mapped[int] = mapped_column(primary_key=True)
     ticket_id: Mapped[int] = mapped_column(ForeignKey("tickets.id", ondelete="CASCADE"))
+    message_id: Mapped[int | None] = mapped_column(
+        ForeignKey("ticket_messages.id", ondelete="CASCADE"), index=True
+    )
     object_key: Mapped[str] = mapped_column(String(255), unique=True)
-    content_type: Mapped[str] = mapped_column(String(50))
+    content_type: Mapped[str] = mapped_column(String(100))
+    filename: Mapped[str | None] = mapped_column(String(255))
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now())
 
     ticket: Mapped[Ticket] = relationship(back_populates="images")
+
+    @property
+    def is_image(self) -> bool:
+        return self.content_type.startswith("image/")
 
 
 class TicketMessage(Base):
@@ -78,3 +93,4 @@ class TicketMessage(Base):
 
     ticket: Mapped[Ticket] = relationship(back_populates="messages")
     author: Mapped[User] = relationship(lazy="joined")
+    attachments: Mapped[list[TicketImage]] = relationship(lazy="selectin")

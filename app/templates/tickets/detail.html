@@ -18,16 +18,7 @@
         {{ ui.status_badge(ticket.status) }}
       </div>
       <p class="mt-4 whitespace-pre-line text-slate-700">{{ ticket.description }}</p>
-      {% if ticket.images %}
-      <div class="mt-5 grid grid-cols-3 gap-3">
-        {% for image in ticket.images %}
-        {% set url = "/tickets/" ~ ticket.id ~ "/images/" ~ image.id %}
-        <a href="{{ url }}" target="_blank" class="block aspect-square overflow-hidden rounded-xl border border-slate-200">
-          <img src="{{ url }}" alt="Imagen adjunta {{ loop.index }}" loading="lazy" class="size-full object-cover transition hover:scale-105">
-        </a>
-        {% endfor %}
-      </div>
-      {% endif %}
+      {{ ui.attachment_list(ticket.id, ticket.description_images) }}
     </article>
 
     {% include "tickets/_conversation.html" %}
@@ -35,10 +26,14 @@
     {% if is_closed %}
       {{ ui.alert("Esta consulta está cerrada. Para continuar es necesario crear una consulta nueva.") }}
     {% else %}
-    <form class="card space-y-4" hx-post="/tickets/{{ ticket.id }}/replies" hx-target="#form-alert"
-          hx-disabled-elt="find button">
+    <form class="card space-y-4" hx-post="/tickets/{{ ticket.id }}/replies" hx-encoding="multipart/form-data"
+          hx-target="#form-alert" hx-disabled-elt="find button">
       {{ ui.form_alert() }}
-      {{ ui.textarea("body", "Responder", rows=4, placeholder="Escribe tu respuesta...") }}
+      <div class="space-y-1.5">
+        <label for="body" class="label">Responder</label>
+        <textarea id="body" name="body" rows="4" placeholder="Escribe tu respuesta..." class="input"></textarea>
+      </div>
+      {{ ui.attachments_input("files", max_images, accept, compact=true) }}
       <div class="flex justify-end"><button class="btn-primary">Enviar respuesta</button></div>
     </form>
     {% endif %}

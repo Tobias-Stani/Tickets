@@ -19,8 +19,10 @@ def get_ticket_service(db: DbSession, storage: Annotated[Storage, Depends(get_st
     return TicketService(db, storage)
 
 
-def get_ticket_workflow(db: DbSession) -> TicketWorkflow:
-    return TicketWorkflow(db)
+def get_ticket_workflow(
+    db: DbSession, storage: Annotated[Storage, Depends(get_storage)]
+) -> TicketWorkflow:
+    return TicketWorkflow(db, storage)
 
 
 async def read_uploads(files: list[UploadFile]) -> list[ImageFile]:

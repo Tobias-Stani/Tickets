@@ -2,7 +2,7 @@ import pytest
 
 from app.core.errors import ValidationError
 from app.modules.tickets.images import MAX_IMAGE_BYTES, ImageFile, validate_images
-from tests.tickets.images import JPEG, PDF, PNG, WEBP
+from tests.tickets.images import DOCX, JPEG, PDF, PNG, WEBP, XLSX, ZIP
 
 
 def test_detects_type_from_content_not_filename():
@@ -28,7 +28,25 @@ def test_rejects_more_than_three_images():
 
 def test_rejects_unsupported_type():
     with pytest.raises(ValidationError):
-        validate_images([ImageFile("doc.png", PDF)])
+        validate_images([ImageFile("archive.pdf", ZIP)])
+
+
+def test_accepts_pdf_word_and_excel():
+    files = validate_images([ImageFile("a.pdf", PDF), ImageFile("b", DOCX), ImageFile("c", XLSX)])
+
+    assert [file.extension for file in files] == ["pdf", "docx", "xlsx"]
+
+
+def test_keeps_only_base_filename():
+    [file] = validate_images([ImageFile(r"C:\Users\ana\informe final.pdf", PDF)])
+
+    assert file.filename == "informe final.pdf"
+
+
+def test_names_unnamed_uploads_after_their_type():
+    [file] = validate_images([ImageFile("", PDF)])
+
+    assert file.filename == "archivo.pdf"
 
 
 def test_rejects_oversized_image():

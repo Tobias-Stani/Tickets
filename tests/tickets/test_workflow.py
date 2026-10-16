@@ -3,7 +3,9 @@ from datetime import UTC, datetime
 import pytest
 
 from app.core.errors import NotFoundError, PermissionDeniedError, ValidationError
+from app.modules.tickets.images import ImageFile
 from app.modules.tickets.models import Ticket, TicketStatus
+from tests.tickets.images import PDF, PNG
 
 
 def test_admin_reply_keeps_status_and_history(workflow, open_ticket, admin):
@@ -68,3 +70,33 @@ def test_closed_ticket_cannot_be_reopened(workflow, open_ticket, admin):
 
     with pytest.raises(ValidationError):
         workflow.change_status(admin, open_ticket.id, TicketStatus.OPEN)
+
+
+def test_reply_stores_attachments_on_message_and_ticket(workflow, open_ticket, admin, storage):
+    message = workflow.reply(
+        admin, open_ticket.id, "Te paso el instructivo", [ImageFile("guia.pdf", PDF)]
+    )
+
+    [attachment] = message.attachments
+    assert attachment.filename == "guia.pdf"
+    assert attachment in open_ticket.images
+    assert open_ticket.description_images == []
+    assert attachment.object_key in storage.objects
+
+
+def test_reply_can_be_only_an_attachment(workflow, open_ticket, client_user):
+    message = workflow.reply(client_user, open_ticket.id, "  ", [ImageFile("foto.png", PNG)])
+
+    assert message.body == ""
+    assert len(message.attachments) == 1
+
+
+def test_failed_attachment_upload_leaves_no_reply(workflow, open_ticket, admin, storage, session):
+    storage.fail_on_put = True
+
+    with pytest.raises(RuntimeError):
+        workflow.reply(admin, open_ticket.id, "Hola", [ImageFile("a.pdf", PDF)])
+
+    session.refresh(open_ticket)
+    assert open_ticket.messages == []
+    assert storage.objects == {}

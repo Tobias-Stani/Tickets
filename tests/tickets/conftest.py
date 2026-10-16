@@ -15,8 +15,8 @@ def tickets(session, storage) -> TicketService:
 
 
 @pytest.fixture
-def workflow(session) -> TicketWorkflow:
-    return TicketWorkflow(session)
+def workflow(session, storage) -> TicketWorkflow:
+    return TicketWorkflow(session, storage)
 
 
 @pytest.fixture

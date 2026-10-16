@@ -140,7 +140,7 @@ def test_owner_and_admin_can_read_ticket_image(tickets, create_ticket, client_us
     image_id = ticket.images[0].id
 
     for actor in (client_user, admin):
-        stored = tickets.get_image(actor, ticket.id, image_id)
+        _, stored = tickets.get_image(actor, ticket.id, image_id)
         assert (stored.data, stored.content_type) == (PNG, "image/png")
 
 

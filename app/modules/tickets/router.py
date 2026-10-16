@@ -1,6 +1,7 @@
 """Ticket routes shared by both roles (detail, replies, images) and client-only routes."""
 
 from typing import Annotated
+from urllib.parse import quote
 
 from fastapi import APIRouter, Depends, File, Form, Request, UploadFile
 from fastapi.responses import Response
@@ -14,7 +15,7 @@ from app.modules.tickets.dependencies import (
     read_uploads,
     ticket_create_form,
 )
-from app.modules.tickets.images import MAX_IMAGES
+from app.modules.tickets.images import ACCEPT, MAX_IMAGES
 from app.modules.tickets.schemas import TicketCreate
 from app.modules.topics.service import TopicService
 from app.shared.web import Pagination, redirect
@@ -49,7 +50,7 @@ def notifications(request: Request, user: CurrentUser, tickets: Tickets):
 @router.get("/new")
 def new_ticket_form(request: Request, _: ClientUser, db: DbSession):
     topic_options = [(topic.id, topic.name) for topic in TopicService(db).list_active()]
-    context = {"topic_options": topic_options, "max_images": MAX_IMAGES}
+    context = {"topic_options": topic_options, "max_images": MAX_IMAGES, "accept": ACCEPT}
     return templates.TemplateResponse(request, "tickets/new.html", context)
 
 
@@ -67,24 +68,33 @@ async def create_ticket(
 
 @router.get("/{ticket_id}")
 def ticket_detail(request: Request, user: CurrentUser, tickets: Tickets, ticket_id: int):
-    context = {"ticket": tickets.open_for(user, ticket_id)}
+    context = {
+        "ticket": tickets.open_for(user, ticket_id),
+        "max_images": MAX_IMAGES,
+        "accept": ACCEPT,
+    }
     return templates.TemplateResponse(request, "tickets/detail.html", context)
 
 
 @router.post("/{ticket_id}/replies")
-def reply(
+async def reply(
     request: Request,
     user: CurrentUser,
     workflow: Workflow,
     ticket_id: int,
-    body: Annotated[str, Form()],
+    body: Annotated[str, Form()] = "",
+    files: Annotated[list[UploadFile], File()] = [],  # noqa: B006  FastAPI form default
 ):
-    workflow.reply(user, ticket_id, body)
+    workflow.reply(user, ticket_id, body, await read_uploads(files))
     return redirect(request, f"/tickets/{ticket_id}", "Respuesta enviada.")
 
 
 @router.get("/{ticket_id}/images/{image_id}")
 def ticket_image(user: CurrentUser, tickets: Tickets, ticket_id: int, image_id: int):
-    stored = tickets.get_image(user, ticket_id, image_id)
-    headers = {"Cache-Control": "private, max-age=3600"}
+    """Serves any attachment. Images display inline; documents always download."""
+    attachment, stored = tickets.get_image(user, ticket_id, image_id)
+    headers = {"Cache-Control": "private, max-age=3600", "X-Content-Type-Options": "nosniff"}
+    if not attachment.is_image:
+        name = quote(attachment.filename or f"archivo-{attachment.id}")
+        headers["Content-Disposition"] = f"attachment; filename*=UTF-8''{name}"
     return Response(stored.data, media_type=stored.content_type, headers=headers)
